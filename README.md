@@ -216,6 +216,48 @@ curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/getWebhookInfo"
 4. Nhấn `📝 Tạo post thường` hoặc `📦 Tạo batch 3 bài`
 5. Nhấn `📋 Xem draft queue` để xem/xóa draft
 
+### Cập nhật bản mới nhất
+
+Nếu đã cài bằng npm/npx trước đó, chạy:
+
+```bash
+cd pixel-square-daily
+npx pixel-square-daily@latest setup .
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+curl http://localhost:8096/health
+```
+
+`setup .` sẽ copy code mới vào thư mục hiện tại, giữ nguyên `.env` nếu đã có. Cần `docker compose build --no-cache` để container nhận code/deps mới.
+
+Kiểm tra npm đang trỏ bản mới nhất:
+
+```bash
+npm view pixel-square-daily version
+```
+
+### Gỡ cài đặt
+
+```bash
+cd pixel-square-daily
+docker compose down
+cd ..
+rm -rf pixel-square-daily
+```
+
+Nếu có Cloudflare tunnel container:
+
+```bash
+docker rm -f cloudflared
+```
+
+Nếu từng cài global npm:
+
+```bash
+npm uninstall -g pixel-square-daily
+```
+
 ### Lệnh quản lý nhanh
 
 ```bash
@@ -236,8 +278,6 @@ npx pixel-square-daily@latest start . --once
 ```
 
 > npm install không tự ghi file hay cài Python deps. Mọi side effect chỉ chạy khi gọi `setup`.
-
----
 
 ---
 
