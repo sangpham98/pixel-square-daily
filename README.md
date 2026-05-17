@@ -56,24 +56,13 @@ docker --version
 docker compose version
 ```
 
-### Bước 4: Lấy app và tạo thư mục chạy
+### Bước 4: Lấy app và tạo thư mục chạy bằng npx
 
-Có 2 cách.
-
-**Cách A — dùng npm package đã publish (không cần clone repo):**
+Không cần clone repo. Chạy trực tiếp package đã publish trên npm:
 
 ```bash
 npx pixel-square-daily@latest setup ./pixel-square-daily
 cd pixel-square-daily
-```
-
-**Cách B — dùng trực tiếp từ GitHub/source repo:**
-
-```bash
-git clone https://github.com/sangpham98/pixel-square-daily.git
-cd pixel-square-daily
-npm install -g .
-pixel-square-daily setup .
 ```
 
 Lệnh `setup` sẽ:
@@ -97,13 +86,57 @@ TELEGRAM_CHAT_ID=123456789
 WEBHOOK_PUBLIC_URL=https://pixel.yourdomain.com
 TELEGRAM_WEBHOOK_SECRET=mat-khau-bat-ky
 
-OPENAI_BASE_URL=http://localhost:20128/v1
-OPENAI_API_KEY=not-needed
-OPENAI_MODEL=qw/qwen3-coder-plus
+# LLM: dùng OpenAI-compatible endpoint bất kỳ
+OPENAI_BASE_URL=https://openrouter.ai/api/v1
+OPENAI_API_KEY=sk-or-v1-your_key_here
+OPENAI_MODEL=openai/gpt-4o-mini
 
 BINANCE_SQUARE_OPENAPI_KEY=your_key_here
 BINANCE_AUTO_POST_SHORT=true
 ```
+
+`OPENAI_*` không bắt buộc là OpenAI. App chỉ cần API tương thích OpenAI Chat Completions.
+
+Nếu chưa có LLM router riêng, chọn 1 trong các cách sau:
+
+**Dùng OpenRouter:**
+
+```env
+OPENAI_BASE_URL=https://openrouter.ai/api/v1
+OPENAI_API_KEY=sk-or-v1-your_key_here
+OPENAI_MODEL=openai/gpt-4o-mini
+```
+
+**Dùng OpenAI trực tiếp:**
+
+```env
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_API_KEY=sk-your_openai_key_here
+OPENAI_MODEL=gpt-4o-mini
+```
+
+**Dùng Ollama local:**
+
+```bash
+ollama pull qwen2.5:7b
+ollama serve
+```
+
+```env
+OPENAI_BASE_URL=http://localhost:11434/v1
+OPENAI_API_KEY=not-needed
+OPENAI_MODEL=qwen2.5:7b
+```
+
+**Dùng LM Studio local:**
+
+```env
+OPENAI_BASE_URL=http://localhost:1234/v1
+OPENAI_API_KEY=not-needed
+OPENAI_MODEL=local-model
+```
+
+Nếu chạy app bằng Docker nhưng LLM chạy trên máy host, thay `localhost` bằng `host.docker.internal` hoặc IP LAN của máy host.
 
 ### Bước 6: Kiểm tra cấu hình
 
