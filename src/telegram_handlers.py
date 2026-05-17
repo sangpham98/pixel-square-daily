@@ -21,6 +21,7 @@ from .draft_generator import (
     similarity_warning,
 )
 from .draft_queue import (
+    delete_draft_by_index,
     generate_draft_batch,
     load_draft_queue,
     post_next_from_queue,
@@ -30,6 +31,7 @@ from .logger import log
 from .telegram_bot import (
     answer_callback,
     draft_keyboard,
+    draft_queue_keyboard,
     send_telegram,
     telegram_api,
     telegram_send_best_effort,
@@ -165,6 +167,26 @@ def run_batch_generation_async(chat_id: int | str) -> None:
     threading.Thread(target=worker, daemon=True).start()
 
 
+def build_draft_queue_message(queue) -> str:
+    if not queue:
+        return "📋 Draft queue trống"
+    lines = [f"📋 Draft queue ({len(queue)} bài):"]
+    for idx, item in enumerate(queue, 1):
+        preview = " ".join(item.short_post.split())[:120]
+        lines.append(f"{idx}. {item.coin_name} (${item.coin_symbol}) | {item.angle or 'N/A'} | {item.created_at}")
+        if preview:
+            lines.append(f"   {preview}")
+    return "\n".join(lines)
+
+
+
+def send_draft_queue(chat_id: int | str) -> None:
+    queue = load_draft_queue()
+    reply_markup = draft_queue_keyboard(queue) if queue else None
+    telegram_send_best_effort(chat_id, build_draft_queue_message(queue), reply_markup=reply_markup)
+
+
+
 def run_post_next_async(chat_id: int | str) -> None:
     def worker():
         try:
@@ -226,6 +248,25 @@ def handle_update(update: dict) -> None:
         elif data == "pixel_post_next":
             answer_callback(callback_id, "Đang đăng bài tiếp theo...")
             run_post_next_async(chat_id)
+        elif data == "pixel_draft_queue":
+            answer_callback(callback_id, "Đang lấy draft queue...")
+            send_draft_queue(chat_id)
+        elif data.startswith("pixel_delete_draft:"):
+            try:
+                index = int(data.split(":", 1)[1])
+            except ValueError:
+                answer_callback(callback_id, "Draft không hợp lệ")
+                telegram_send_best_effort(chat_id, "❌ Draft không hợp lệ")
+                send_draft_queue(chat_id)
+                return
+            item, error = delete_draft_by_index(index)
+            if item is None:
+                answer_callback(callback_id, error or "Không xóa được")
+                telegram_send_best_effort(chat_id, f"❌ {error or 'Không xóa được draft'}")
+            else:
+                answer_callback(callback_id, f"Đã xóa #{index}")
+                telegram_send_best_effort(chat_id, f"🗑 Đã xóa draft #{index}: {item.coin_name} (${item.coin_symbol})")
+            send_draft_queue(chat_id)
         elif data == "pixel_status":
             answer_callback(callback_id, "Đang lấy status...")
             run_status_async(chat_id)

@@ -37,9 +37,13 @@ def generate_draft_batch(count: int = 3) -> list[DraftQueueItem]:
     from .draft_generator import build_draft_with_similarity
 
     queue: list[DraftQueueItem] = []
+    excluded_symbols: set[str] = set()
     for i in range(count):
         try:
-            draft, posts, from_cache, similarity_score, attempt, coin, angle_name = build_draft_with_similarity(mode="short")
+            draft, posts, from_cache, similarity_score, attempt, coin, angle_name = build_draft_with_similarity(
+                mode="short",
+                excluded_symbols=excluded_symbols,
+            )
             short_post = extract_short_post(draft)
             item = DraftQueueItem(
                 coin_symbol=coin.symbol.upper(),
@@ -51,12 +55,26 @@ def generate_draft_batch(count: int = 3) -> list[DraftQueueItem]:
                 angle=angle_name,
             )
             queue.append(item)
+            excluded_symbols.add(coin.symbol.upper())
             log.info("Batch %d/%d: generated draft for %s (%s), angle=%s", i + 1, count, coin.name, coin.cashtag, angle_name)
         except Exception as exc:
             log.error("Batch generation failed at %d/%d: %s", i + 1, count, exc)
             break
     save_draft_queue(queue)
     return queue
+
+
+def delete_draft_by_index(index: int) -> tuple[DraftQueueItem | None, str | None]:
+    queue = load_draft_queue()
+    if not queue:
+        return None, "Queue trống"
+    if index < 1 or index > len(queue):
+        return None, f"Không có draft #{index}"
+    item = queue.pop(index - 1)
+    save_draft_queue(queue)
+    log.info("Deleted queued draft #%d for %s, %d remaining", index, item.coin_symbol, len(queue))
+    return item, None
+
 
 
 def post_next_from_queue() -> tuple[DraftQueueItem | None, str | None]:

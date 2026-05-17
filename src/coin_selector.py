@@ -6,7 +6,7 @@ import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 import requests
 
@@ -132,10 +132,11 @@ def enrich_trending_with_market_data(candidates: list[CoinContext]) -> list[Coin
     return enriched
 
 
-def select_hot_coin() -> CoinContext:
+def select_hot_coin(excluded_symbols: Iterable[str] | None = None) -> CoinContext:
     """Pick a hot coin with enough market quality, excluding recent history."""
     candidates: list[CoinContext] = []
     trending_symbols: set[str] = set()
+    extra_excluded_symbols = {symbol.upper() for symbol in excluded_symbols or []}
 
     # Fetch trending coins with cache
     cache_key_trending = "trending_coins"
@@ -203,9 +204,10 @@ def select_hot_coin() -> CoinContext:
 
     if best_by_symbol:
         recent_symbols = recent_coin_symbols(hours=COIN_RECENT_EXCLUDE_HOURS, limit=COIN_RECENT_EXCLUDE_COUNT)
+        excluded = recent_symbols | extra_excluded_symbols
         unique = sorted(best_by_symbol.values(), key=lambda coin: score_coin(coin, trending_symbols), reverse=True)
-        eligible = [coin for coin in unique if coin.symbol.upper() not in recent_symbols]
-        pool = eligible or unique
+        eligible = [coin for coin in unique if coin.symbol.upper() not in excluded]
+        pool = eligible or [coin for coin in unique if coin.symbol.upper() not in extra_excluded_symbols] or unique
         selected = pool[0]
         score = score_coin(selected, trending_symbols)
         if selected.symbol.upper() in recent_symbols:

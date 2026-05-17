@@ -69,6 +69,7 @@ from .utils import (
 from .logger import log
 from .models import DraftQueueItem, SquarePost
 from .draft_queue import (
+    delete_draft_by_index,
     generate_draft_batch,
     load_draft_queue,
     post_next_from_queue,
@@ -162,6 +163,7 @@ __all__ = [
     "DraftQueueItem",
     "SquarePost",
     # draft_queue
+    "delete_draft_by_index",
     "generate_draft_batch",
     "load_draft_queue",
     "post_next_from_queue",

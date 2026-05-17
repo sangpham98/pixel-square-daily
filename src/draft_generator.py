@@ -136,8 +136,8 @@ def generation_lock(blocking: bool = False):
 # --- Draft generation ---
 
 
-def build_draft(mode: str = "both") -> tuple[str, list[SquarePost], bool, CoinContext, str]:
-    coin = select_hot_coin()
+def build_draft(mode: str = "both", excluded_symbols: Iterable[str] | None = None) -> tuple[str, list[SquarePost], bool, CoinContext, str]:
+    coin = select_hot_coin(excluded_symbols=excluded_symbols)
     posts = fetch_coin_posts(coin)
     from_cache = False
     prompt, angle_name = build_prompt(posts, coin, mode=mode)
@@ -146,7 +146,11 @@ def build_draft(mode: str = "both") -> tuple[str, list[SquarePost], bool, CoinCo
     return draft, posts, from_cache, coin, angle_name
 
 
-def build_draft_with_similarity(mode: str = "both", max_regenerations: int | None = None) -> tuple[str, list[SquarePost], bool, float, int, CoinContext, str]:
+def build_draft_with_similarity(
+    mode: str = "both",
+    max_regenerations: int | None = None,
+    excluded_symbols: Iterable[str] | None = None,
+) -> tuple[str, list[SquarePost], bool, float, int, CoinContext, str]:
     if max_regenerations is None:
         max_regenerations = SIMILARITY_MAX_REGENERATIONS
     last_draft = ""
@@ -160,7 +164,7 @@ def build_draft_with_similarity(mode: str = "both", max_regenerations: int | Non
     history_texts = recent_history_texts(limit=DEFAULT_HISTORY_LIMIT)
 
     for attempt in range(max_regenerations + 1):
-        draft, posts, from_cache, coin, angle_name = build_draft(mode=mode)
+        draft, posts, from_cache, coin, angle_name = build_draft(mode=mode, excluded_symbols=excluded_symbols)
         score, _ = max_history_similarity(draft, history_texts=history_texts)
         last_draft, last_posts, last_from_cache, last_score, last_attempt, last_coin, last_angle = draft, posts, from_cache, score, attempt, coin, angle_name
         log.info("Similarity check attempt %d: %.3f", attempt + 1, score)

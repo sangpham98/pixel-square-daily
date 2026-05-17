@@ -8,6 +8,7 @@ import time
 import requests
 
 from .logger import log
+from .models import DraftQueueItem
 from .utils import env
 
 
@@ -48,6 +49,8 @@ def draft_keyboard() -> dict:
         ], [
             {"text": "📦 Tạo batch 3 bài", "callback_data": "pixel_generate_batch"},
         ], [
+            {"text": "📋 Xem draft queue", "callback_data": "pixel_draft_queue"},
+        ], [
             {"text": "📤 Đăng bài tiếp theo", "callback_data": "pixel_post_next"},
         ], [
             {"text": "🔑 Set API key Binance", "callback_data": "pixel_set_api_key"},
@@ -57,6 +60,16 @@ def draft_keyboard() -> dict:
             {"text": "📈 Phân bố góc", "callback_data": "pixel_angles"},
         ]]
     }
+
+
+def draft_queue_keyboard(queue: list[DraftQueueItem]) -> dict:
+    rows = [
+        [{"text": f"🗑 Xóa #{idx} {item.coin_symbol}", "callback_data": f"pixel_delete_draft:{idx}"}]
+        for idx, item in enumerate(queue, 1)
+    ]
+    rows.append([{"text": "🔄 Refresh", "callback_data": "pixel_draft_queue"}])
+    return {"inline_keyboard": rows}
+
 
 
 def send_telegram(message: str, reply_markup: dict | None = None) -> None:

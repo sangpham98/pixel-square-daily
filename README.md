@@ -10,6 +10,7 @@ Bot tự chọn coin hot, tạo post cho Binance Square, đăng tự động m�
 - ✅ Auto-post Binance Square
 - ✅ Similarity gate chặn bài trùng
 - ✅ Batch generation (3 draft cùng lúc)
+- ✅ Draft queue viewer + xóa draft từ Telegram
 - ✅ SQLite database cho history
 
 ---
@@ -228,6 +229,7 @@ Gõ `/menu` để mở menu với các nút:
 |-----|-----------|
 | 📝 Tạo post thường | Tạo 1 draft |
 | 📦 Tạo batch 3 bài | Tạo 3 draft, lưu queue |
+| 📋 Xem draft queue | Xem các draft đã tạo và xóa draft theo số thứ tự |
 | 📤 Đăng bài tiếp theo | Đăng bài từ queue |
 | 🔑 Set API key Binance | Cập nhật API key |
 | 📊 Status | Kiểm tra trạng thái bot |
