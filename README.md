@@ -98,7 +98,43 @@ SIMILARITY_BLOCK_THRESHOLD=0.98
 COIN_RECENT_EXCLUDE_HOURS=48
 ```
 
-### Bước 4: Build và chạy
+### Bước 4: Tạo Cloudflare Tunnel
+
+Tunnel giúp expose webhook ra public URL (HTTPS) để Telegram gửi updates.
+
+**Tạo tunnel trên Cloudflare Dashboard:**
+
+1. Vào [Cloudflare Zero Trust](https://one.dash.cloudflare.com/) > **Networks** > **Tunnels**
+2. Nhấn **Create a tunnel** > chọn **Cloudflared** > đặt tên (ví dụ: `pixel-daily`)
+3. Copy lệnh **Docker** hiện ra (dạng `docker run cloudflare/cloudflared:latest tunnel --no-autoupdate run --token <TOKEN>`)
+4. Trong phần **Public Hostname**, thêm hostname:
+   - Hostname: domain bạn muốn (ví dụ: `pixel.yourdomain.com`)
+   - Service: `http://localhost:8096`
+5. Lưu lại
+
+**Chạy tunnel container:**
+
+```bash
+# Thay <TOKEN> bằng token từ Cloudflare Dashboard
+docker run -d --name cloudflared --network host --restart unless-stopped cloudflare/cloudflared:latest tunnel --no-autoupdate run --token <TOKEN>
+```
+
+> `--network host` để container truy cập được `localhost:8096` từ webhook container.
+
+**Kiểm tra tunnel chạy:**
+
+```bash
+docker ps | grep cloudflared
+# Phải hiện "Up" và STATUS không có "(unhealthy)"
+```
+
+Cập nhật `WEBHOOK_PUBLIC_URL` trong `.env` thành domain đã cấu hình:
+
+```env
+WEBHOOK_PUBLIC_URL=https://pixel.yourdomain.com
+```
+
+### Bước 5: Build và chạy app
 
 ```bash
 # Build image (lần đầu mất 1-2 phút)
@@ -109,51 +145,6 @@ docker compose up -d
 
 # Kiểm tra container đang chạy
 docker compose ps
-```
-
-### Bước 5: Expose webhook ra public URL
-
-Telegram cần gửi HTTPS request đến server của bạn. Chọn 1 trong các cách sau:
-
-**Cách A: Cloudflare Tunnel (khuyến nghị, miễn phí)**
-
-```bash
-# Cài cloudflared
-curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared
-chmod +x /usr/local/bin/cloudflared
-
-# Đăng nhập (mở link hiện ra trong browser)
-cloudflared tunnel login
-
-# Tạo tunnel
-cloudflared tunnel create pixel-daily
-
-# Chạy tunnel (trỏ localhost:8096 ra public)
-cloudflared tunnel run --url http://localhost:8096 pixel-daily
-```
-
-Lấy URL từ output (ví dụ: `https://abc-123.trycloudflare.com`), cập nhật vào `.env`:
-
-```env
-WEBHOOK_PUBLIC_URL=https://abc-123.trycloudflare.com
-```
-
-**Cách B: Nginx reverse proxy (nếu có domain + SSL)**
-
-```nginx
-server {
-    listen 443 ssl;
-    server_name your-domain.com;
-
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
-
-    location / {
-        proxy_pass http://127.0.0.1:8096;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
 ```
 
 ### Bước 6: Đăng ký webhook với Telegram
@@ -207,7 +198,7 @@ docker compose logs -f webhook
 # Restart webhook
 docker compose restart webhook
 
-# Dừng tất cả
+# Dừng tất cả (webhook + bot)
 docker compose down
 
 # Rebuild sau khi update code
@@ -217,6 +208,12 @@ docker compose up -d
 
 # Chạy one-shot bot (tạo 1 bài rồi thoát)
 docker compose run --rm bot
+
+# Xem logs tunnel
+docker logs cloudflared
+
+# Restart tunnel
+docker restart cloudflared
 ```
 
 ---
