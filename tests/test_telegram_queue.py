@@ -1,6 +1,6 @@
 from src.models import DraftQueueItem
 from src.telegram_bot import draft_keyboard, draft_queue_keyboard
-from src.telegram_handlers import build_draft_queue_message
+from src.telegram_handlers import build_draft_queue_message, handle_update
 
 
 def _item(symbol: str = "BTC", name: str = "Bitcoin") -> DraftQueueItem:
@@ -36,3 +36,26 @@ def test_build_draft_queue_message_formats_items():
 
 def test_build_draft_queue_message_empty():
     assert build_draft_queue_message([]) == "📋 Draft queue trống"
+
+
+def test_start_command_sends_inline_menu(monkeypatch):
+    sent: list[tuple[int, str, dict]] = []
+
+    def fake_send(chat_id, text, **kwargs):
+        sent.append((chat_id, text, kwargs))
+
+    monkeypatch.setattr("src.telegram_handlers.telegram_send_best_effort", fake_send)
+
+    handle_update({
+        "message": {
+            "chat": {"id": 123},
+            "from": {"id": 456},
+            "text": "/start",
+        }
+    })
+
+    assert sent
+    assert sent[0][0] == 123
+    assert "reply_markup" in sent[0][2]
+    callbacks = [button["callback_data"] for row in sent[0][2]["reply_markup"]["inline_keyboard"] for button in row]
+    assert "pixel_generate_short" in callbacks

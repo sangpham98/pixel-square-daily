@@ -296,9 +296,9 @@ def handle_update(update: dict) -> None:
             return
 
         if text.startswith("/"):
-            cmd = text.split()[0].lower()
+            cmd = text.split()[0].lower().split("@", 1)[0]
             if cmd == "/start":
-                telegram_send_best_effort(chat_id, "👋 Pixel Square Daily Bot\nGõ /menu để mở menu.")
+                telegram_send_best_effort(chat_id, "👋 Pixel Square Daily Bot\nChọn nút bên dưới hoặc gõ /menu.", reply_markup=draft_keyboard())
             elif cmd == "/status":
                 run_status_async(chat_id)
             elif cmd == "/generate":
