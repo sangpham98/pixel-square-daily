@@ -21,6 +21,13 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tgz
+
 # Git
 .git/
 .gitignore

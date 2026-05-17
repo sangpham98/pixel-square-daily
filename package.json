@@ -1,0 +1,27 @@
+{
+  "name": "pixel-square-daily",
+  "version": "0.1.0",
+  "description": "NPM CLI wrapper for Pixel Square Daily Python crypto content bot.",
+  "bin": {
+    "pixel-square-daily": "bin/pixel-square-daily.js"
+  },
+  "files": [
+    "bin/",
+    "src/*.py",
+    "pixel_square_daily.py",
+    "webhook_app.py",
+    "requirements.txt",
+    ".env.example",
+    "Dockerfile",
+    "docker-compose.yml",
+    "README.md"
+  ],
+  "scripts": {
+    "cli:help": "node bin/pixel-square-daily.js --help",
+    "pack:check": "npm pack --dry-run"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
