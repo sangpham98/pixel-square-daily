@@ -1,0 +1,14 @@
+[Unit]
+Description=Hot Coin Binance Square Telegram Webhook
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.openclaw/workspace/pixel-square-daily
+ExecStart=%h/.openclaw/workspace/pixel-square-daily/.venv/bin/uvicorn webhook_app:app --host 127.0.0.1 --port 8096
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=default.target

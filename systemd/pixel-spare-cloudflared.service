@@ -1,0 +1,13 @@
+[Unit]
+Description=Cloudflare quick tunnel for Hot Coin Binance Square webhook
+After=network-online.target pixel-spare-webhook.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.openclaw/workspace/pixel-square-daily
+ExecStart=%h/.openclaw/workspace/pixel-square-daily/.venv/bin/python %h/.openclaw/workspace/pixel-square-daily/tunnel/sync_webhook.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target

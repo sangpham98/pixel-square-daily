@@ -1,0 +1,31 @@
+# Runtime secrets / local config
+.env
+user_square_keys.json
+
+# Runtime state
+sent_history.txt
+history.db
+source_cache.json
+telegram_offset.txt
+pixel_generation.lock
+draft_queue.json
+*.log
+
+# Local tunnel/runtime artifacts
+tunnel/cloudflared.log
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Archive / dead files
+archive/
+
+# OS/editor
+.DS_Store
+*.swp
+
+# Cache files
+coingecko_cache.json

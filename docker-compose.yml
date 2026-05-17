@@ -1,0 +1,21 @@
+services:
+  bot:
+    build: .
+    env_file: .env
+    environment:
+      - RUN_ONCE=true
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - .:/app
+    working_dir: /app
+
+  webhook:
+    build: .
+    command: uvicorn webhook_app:app --host 0.0.0.0 --port 8096
+    env_file: .env
+    ports:
+      - "8096:8096"
+    restart: unless-stopped
+    volumes:
+      - .:/app
+    working_dir: /app

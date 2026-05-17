@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Hot Coin Binance Square Auto Poster every 6 hours
+
+[Timer]
+OnCalendar=*-*-* 00/6:00:00
+Persistent=true
+Unit=pixel-square-daily.service
+
+[Install]
+WantedBy=timers.target

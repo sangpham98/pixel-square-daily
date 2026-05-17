@@ -1,0 +1,36 @@
+# Runtime secrets / local config
+.env
+.env.*
+user_square_keys.json
+
+# Runtime state
+sent_history.txt
+source_cache.json
+telegram_offset.txt
+pixel_generation.lock
+draft_queue.json
+*.log
+*.db
+
+# Local tunnel/runtime artifacts
+tunnel/cloudflared.log
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Git
+.git/
+.gitignore
+
+# OS/editor
+.DS_Store
+*.swp
+
+# Docs / non-runtime
+docs/
+README.md
+IMPROVEMENT_ROADMAP.md
+DEPLOYMENT_CHECKLIST.md
