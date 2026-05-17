@@ -1,6 +1,6 @@
 {
   "name": "pixel-square-daily",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "NPM CLI wrapper for Pixel Square Daily Python crypto content bot.",
   "bin": {
     "pixel-square-daily": "bin/pixel-square-daily.js"
